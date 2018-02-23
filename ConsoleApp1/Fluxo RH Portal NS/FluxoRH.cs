@@ -265,6 +265,7 @@ namespace ConsoleApp1.Fluxo_RH_Portal_NS
         #endregion
 
         string numProtocolo;
+        int cont;
 
 
         #region MÉTODOS DE ENVIO DE IMAGENS
@@ -319,7 +320,7 @@ namespace ConsoleApp1.Fluxo_RH_Portal_NS
 
             /* Variável do tipo WebDriverWait: utilizada quando é preciso aguardar algum elemento em tela 
              estar visível ou habilitado para executar uma ação. Ela irá esperar até o tempo definido. */
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
 
             /* Variável do tipo IJavaScriptExecutor: utilizada para acessar elementos de tela que
              utilizam de mecanismos do JavaScript*/
@@ -370,24 +371,42 @@ namespace ConsoleApp1.Fluxo_RH_Portal_NS
 
             driver.FindElement(By.Id("MainContent_ucPesquisaComum_txtEtiqueta")).SendKeys(matricula);
             driver.FindElement(By.Id("btnPesquisar")).Click();
-            wait.Until(d => d.FindElement(By.Id("btnUpload")).Displayed);
-            //jse.ExecuteScript("window.scrollBy(0,250)", "");
-            driver.FindElement(By.Id("btnUpload")).Click();
+            Thread.Sleep(1000);
+            try
+            {
+                driver.FindElement(By.Id("btnUpload")).Click();
+            }
+            catch (NoSuchElementException)
+            {
+                Assert.Fail("Etiqueta não está na fila 'Aguardando Upload'.");
+            }
+
             #endregion
 
             #region UPLOAD DE IMAGEM
+
             wait.Until(d => d.FindElement(By.XPath("//*[@id='ctl00_MainContent_ucArquivos_btnSelecionar']")).Displayed);
             IWebElement file = driver.FindElement(By.XPath("//*[@id='ctl00_MainContent_ucArquivos_btnSelecionar']"));
-            UploadCPF(file);
-            Thread.Sleep(1000);
-            UploadRG(file);
-            Thread.Sleep(1000);
-            //UploadRG(file);
-            //Thread.Sleep(1000);
-            driver.FindElement(By.Id("ctl00_MainContent_ucArquivos_btnUpload")).Click();
 
-            wait.Until(d => d.FindElement(By.Id("ctl00_MainContent_ucArquivos_btnFinalizar")).Enabled);
-            driver.FindElement(By.Id("ctl00_MainContent_ucArquivos_btnFinalizar")).Click();
+            for (int i = 0; i <= 2; i++)
+            {
+                UploadCPF(file);
+                Thread.Sleep(1000);
+                cont++;
+            }
+            driver.FindElement(By.Id("ctl00_MainContent_ucArquivos_btnUpload")).Click();
+            Thread.Sleep(2000);
+            try
+            {
+                wait.Until(d => d.FindElement(By.Id("ctl00_MainContent_ucArquivos_btnFinalizar")).Enabled);
+                driver.FindElement(By.Id("ctl00_MainContent_ucArquivos_btnFinalizar")).Click();
+            }
+            catch (WebDriverTimeoutException)
+            {
+                Assert.Fail("Problemas ao finalizar o Upload.");
+            }
+
+
             #endregion
 
             #region TIPIFICAÇÃO
@@ -395,16 +414,28 @@ namespace ConsoleApp1.Fluxo_RH_Portal_NS
             driver.FindElement(By.XPath("//a[text()='Análise']")).Click();
             wait.Until(d => d.FindElement(By.XPath("//a[text()='Tipificação']")).Displayed);
             driver.FindElement(By.XPath("//a[text()='Tipificação']")).Click();
-            Thread.Sleep(2000);
-            driver.FindElement(By.Id("txtFiltro")).SendKeys("CPF");
-            jse.ExecuteScript("window.scrollBy(0,250)", "");
-            driver.FindElement(By.XPath("//button[text()='Salvar']")).Click();
             Thread.Sleep(1000);
-            driver.FindElement(By.Id("txtFiltro")).SendKeys("RG");
-            jse.ExecuteScript("window.scrollBy(0,250)", "");
-            driver.FindElement(By.XPath("//button[text()='Salvar']")).Click();
-            wait.Until(d => d.FindElement(By.CssSelector(".btn.btn-default.btnModalCancelar")).Displayed);
-            driver.FindElement(By.CssSelector(".btn.btn-default.btnModalCancelar")).Click();
+            for (int i = 0; i <= cont; i++)
+            {
+                driver.FindElement(By.Id("txtFiltro")).SendKeys("CPF");
+                jse.ExecuteScript("window.scrollBy(0,250)", "");
+                driver.FindElement(By.XPath("//button[text()='Salvar']")).Click();
+                Thread.Sleep(1000);
+            }
+            //driver.FindElement(By.Id("txtFiltro")).SendKeys("RG");
+            //jse.ExecuteScript("window.scrollBy(0,250)", "");
+            //driver.FindElement(By.XPath("//button[text()='Salvar']")).Click();
+
+            try
+            {
+                wait.Until(d => d.FindElement(By.XPath("//div[text()= 'Não existem mais documentos a serem Tipificados.']")).Displayed);
+                driver.FindElement(By.CssSelector(".btn.btn-default.btnModalCancelar")).Click();
+            }
+            catch (WebDriverTimeoutException)
+            {
+                Assert.Fail("Não foram encontrados documentos para tipificação.");
+            }
+
             #endregion
 
             #region FORMALIZAÇÃO
@@ -412,16 +443,25 @@ namespace ConsoleApp1.Fluxo_RH_Portal_NS
             wait.Until(d => d.FindElement(By.XPath("//a[text()='Formalização']")).Displayed);
             driver.FindElement(By.XPath("//a[text()='Formalização']")).Click();
             wait.Until(d => d.FindElement(By.Id("MainContent_ucPesquisaComum_txtEtiqueta")).Displayed);
-            driver.FindElement(By.Id("MainContent_ucPesquisaComum_txtEtiqueta")).SendKeys(matricula);
+            driver.FindElement(By.Id("MainContent_ucPesquisaComum_txtEtiqueta")).SendKeys("99984453722610");
             Thread.Sleep(1000);
             driver.FindElement(By.Id("btnPesquisar")).Click();
-            do
+
+                try
             {
+                wait.Until(d => d.FindElement(By.Id("ctl00_MainContent_ucPesquisaComum_radCampos_ctl00__0")).Displayed);
                 driver.FindElement(By.Id("btnPesquisar")).Click();
-            } while (wait.Until(d => d.FindElement(By.Id("ctl00_MainContent_ucPesquisaComum_radCampos_ctl00__0")).Displayed) == false);
-
-
+            }
+            catch (WebDriverTimeoutException)
+            {
+                Assert.Fail("Etiqueta não foi encontrada. Verificar se o documento foi tipificado corretamente.");
+            }
             driver.FindElement(By.Id("btnAnalisar")).Click();
+            //do
+            //{
+            //    driver.FindElement(By.Id("btnPesquisar")).Click();
+            //} while (wait.Until(d => d.FindElement(By.Id("ctl00_MainContent_ucPesquisaComum_radCampos_ctl00__0")).Displayed) == false);
+
             #endregion
 
             #region ANÁLISE FORMALIZAÇÃO
@@ -458,7 +498,7 @@ namespace ConsoleApp1.Fluxo_RH_Portal_NS
             driver.FindElement(By.Id("numMalote")).SendKeys(numProtocolo);
             driver.FindElement(By.Id("numLacre")).SendKeys(numProtocolo);
             driver.FindElement(By.Id("btnGerarProt")).Click();
-       
+
             #endregion
 
             #region CAIXA TEMPORÁRIA
@@ -511,7 +551,7 @@ namespace ConsoleApp1.Fluxo_RH_Portal_NS
 
 
         [Test]
-        public void TesteAutomaizadoNSRH()
+        public void TesteAutomatizadoNSRH()
         {
             Random r = new Random();
             int pos = r.Next(matricula.Length);
