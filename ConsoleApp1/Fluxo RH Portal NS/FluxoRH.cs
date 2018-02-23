@@ -517,7 +517,7 @@ namespace ConsoleApp1.Fluxo_RH_Portal_NS
             int pos = r.Next(matricula.Length);
                 string mat = matricula[pos];
                 FluxoNSRH(mat);
-            Console.WriteLine(numProtocolo);
+           
         }
 
 			
