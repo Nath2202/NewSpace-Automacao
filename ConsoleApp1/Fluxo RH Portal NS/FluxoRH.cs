@@ -420,6 +420,7 @@ namespace ConsoleApp1.Fluxo_RH_Portal_NS
                 driver.FindElement(By.Id("btnPesquisar")).Click();
             } while (wait.Until(d => d.FindElement(By.Id("ctl00_MainContent_ucPesquisaComum_radCampos_ctl00__0")).Displayed) == false);
 
+
             driver.FindElement(By.Id("btnAnalisar")).Click();
             #endregion
 
