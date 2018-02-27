@@ -141,7 +141,7 @@ namespace ConsoleApp1.Fluxo_RH_Portal_NS
             element.Click();
             Thread.Sleep(1000);
             auto.WinActivate("Escolher arquivo a carregar");
-            auto.Send(@"  C:\Users\nlourenco\Pictures\Fluxo RH\CPF.jpg");
+            auto.Send(@"  C:\Users\nlourenco\Pictures\Fluxo RH\Titulo de Eleitor.jpg");
             Thread.Sleep(1000);
             auto.Send("{ENTER}");
         }
@@ -162,7 +162,7 @@ namespace ConsoleApp1.Fluxo_RH_Portal_NS
             element.Click();
             Thread.Sleep(1000);
             autoThree.WinActivate("Escolher arquivo a carregar");
-            autoThree.Send(@"  C:\Users\nlourenco\Pictures\Fluxo RH\Titulo de Eleitor.jpg");
+            autoThree.Send(@"  C:\Users\nlourenco\Pictures\Fluxo RH\Titulo de Eleitor.png");
             Thread.Sleep(1000);
             autoThree.Send("{ENTER}");
         }
@@ -260,7 +260,7 @@ namespace ConsoleApp1.Fluxo_RH_Portal_NS
             //    cont++;
             //}
 
-            UploadCPF(file);
+            UploadTitulo(file);
             Thread.Sleep(1000);
 
             driver.FindElement(By.Id("ctl00_MainContent_ucArquivos_btnUpload")).Click();
